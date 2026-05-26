@@ -31,7 +31,7 @@ st.markdown("""
         font-family: 'Helvetica Neue', sans-serif;
     }
     
-    /* CORRECCIÓN: Forzar que las métricas y contadores tengan letra oscura */
+    /* Forzar que las métricas y contadores tengan letra oscura */
     [data-testid="stMetricValue"] {
         color: #2D3748 !important;
         font-weight: bold !important;
@@ -60,7 +60,7 @@ st.markdown("""
         transform: translateY(-2px);
     }
     
-    /* Cuadros de mensajes personalizados (reemplazan los de streamlit que no se leían) */
+    /* Cuadros de mensajes personalizados */
     .mensaje-exito {
         background-color: #DEF7EC;
         color: #03543F;
@@ -128,6 +128,10 @@ def eliminar_ultimo_registro():
         return True
     return False
 
+def reiniciar_todo():
+    c.execute("DELETE FROM registro")
+    conn.commit()
+
 # 4. INTERFAZ DE USUARIO
 st.write("<h1 style='margin-bottom: 0px;'>¿Mi bibol comió bien? ❤️</h1>", unsafe_allow_html=True)
 st.write("<p style='text-align: center; color: #718096; font-size: 1.1em;'>Registra cómo te fue con tu comida hoy, mi niña</p>", unsafe_allow_html=True)
@@ -163,7 +167,7 @@ with col3:
         st.session_state.tipo_mensaje = "error"
         st.rerun()
 
-# CORRECCIÓN: Mostrar los nuevos cuadros con colores legibles
+# Mostrar mensajes
 if st.session_state.mensaje:
     st.write("")
     if st.session_state.tipo_mensaje == "success": 
@@ -180,7 +184,6 @@ st.markdown("### 🎯 Tu progreso hacia la bolsa 👜")
 progreso_porcentaje = min(total_actual / 60.0, 1.0)
 st.progress(progreso_porcentaje)
 
-# Aquí el número saldrá oscuro automáticamente gracias al CSS de arriba
 st.metric(label="Estrellas acumuladas", value=f"{total_actual} / 60 ⭐")
 
 if total_actual >= 60:
@@ -211,15 +214,10 @@ if historial:
         })
     st.dataframe(tabla_datos, use_container_width=True, hide_index=True)
     
-    # NUEVA FUNCIÓN: Botón discreto para borrar el último registro en caso de error
+    # Menú de herramientas corregido
     st.write("")
-    expander = st.開設_expander = st.expander("¿Te equivocaste al anotar? Haz clic aquí")
-    with expander:
-        st.write("Esto borrará la última fila que añadieron en la tabla.")
-        if st.button("⚠️ Borrar el último registro", type="secondary"):
-            if eliminar_ultimo_registro():
-                st.toast("¡Último registro eliminado con éxito!")
-                st.session_state.mensaje = None # Limpia el mensaje de felicitación actual
-                st.rerun()
-else:
-    st.info("Aún no hay registros. ¡Tu primera estrellita te espera hoy! ✨")
+    with st.expander("⚙️ Configuración / Corregir errores"):
+        st.write("Usa estas opciones si te equivocaste al anotar o quieres reiniciar las pruebas.")
+        
+        # Botón para borrar solo el último
+        if st.button("⚠️ Borrar
