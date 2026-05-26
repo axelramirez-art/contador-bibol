@@ -214,10 +214,23 @@ if historial:
         })
     st.dataframe(tabla_datos, use_container_width=True, hide_index=True)
     
-    # Menú de herramientas corregido
+    # Menú de herramientas desplegable corregido
     st.write("")
     with st.expander("⚙️ Configuración / Corregir errores"):
         st.write("Usa estas opciones si te equivocaste al anotar o quieres reiniciar las pruebas.")
         
-        # Botón para borrar solo el último
-        if st.button("⚠️ Borrar
+        # Botón para borrar solo el último registro
+        if st.button("⚠️ Borrar el último registro", use_container_width=True):
+            if eliminar_ultimo_registro():
+                st.toast("¡Último registro eliminado!")
+                st.session_state.mensaje = None
+                st.rerun()
+        
+        # Botón para borrar absolutamente todo de golpe
+        if st.button("🚨 Reiniciar toda la tabla (Borrar todo)", use_container_width=True):
+            reiniciar_todo()
+            st.toast("¡La tabla ha vuelto a cero!")
+            st.session_state.mensaje = None
+            st.rerun()
+else:
+    st.info("Aún no hay registros. ¡Tu primera estrellita te espera hoy! ✨")
