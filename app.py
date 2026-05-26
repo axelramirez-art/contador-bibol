@@ -40,6 +40,11 @@ st.markdown("""
         color: #4A5568 !important;
     }
     
+    /* CORRECCIÓN: Forzar que el texto dentro del expander (desplegable) sea oscuro */
+    .stExpander div, .stExpander p, .stExpander label, .stExpander span {
+        color: #2D3748 !important;
+    }
+    
     /* Botones de registro */
     div.stButton > button {
         background-color: #FFFFFF;
@@ -214,20 +219,20 @@ if historial:
         })
     st.dataframe(tabla_datos, use_container_width=True, hide_index=True)
     
-    # Menú de herramientas desplegable corregido
+    # Menú desplegable personalizado con tu frase
     st.write("")
-    with st.expander("⚙️ Configuración / Corregir errores"):
-        st.write("Usa estas opciones si te equivocaste al anotar o quieres reiniciar las pruebas.")
+    with st.expander("¿Presionaste mal? Presiona aquí ⚙️"):
+        st.write("Usa estas opciones si hubo un error al registrar o si quieres limpiar las pruebas.")
         
-        # Botón para borrar solo el último registro
-        if st.button("⚠️ Borrar el último registro", use_container_width=True):
+        # Botón para borrar el último registro con la frase especial
+        if st.button("⚠️ Borrar última estrellita (Btw te guardé el azul y tú me guardaste el rojo)", use_container_width=True):
             if eliminar_ultimo_registro():
                 st.toast("¡Último registro eliminado!")
                 st.session_state.mensaje = None
                 st.rerun()
         
-        # Botón para borrar absolutamente todo de golpe
-        if st.button("🚨 Reiniciar toda la tabla (Borrar todo)", use_container_width=True):
+        # Botón para borrar todo
+        if st.button("🚨 Reiniciar toda la tabla a cero", use_container_width=True):
             reiniciar_todo()
             st.toast("¡La tabla ha vuelto a cero!")
             st.session_state.mensaje = None
