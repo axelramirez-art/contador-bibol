@@ -9,7 +9,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Estilo personalizado para cambiar el fondo, botones y textos a tonos románticos
+# Estilo personalizado corregido para legibilidad total
 st.markdown("""
     <style>
     /* Fondo de la aplicación */
@@ -17,7 +17,7 @@ st.markdown("""
         background-color: #FFF5F5;
     }
     
-    /* Estilo del título principal */
+    /* Título principal */
     h1 {
         color: #D53F8C !important;
         text-align: center;
@@ -31,7 +31,16 @@ st.markdown("""
         font-family: 'Helvetica Neue', sans-serif;
     }
     
-    /* Personalización de los botones de Streamlit */
+    /* CORRECCIÓN: Forzar que las métricas y contadores tengan letra oscura */
+    [data-testid="stMetricValue"] {
+        color: #2D3748 !important;
+        font-weight: bold !important;
+    }
+    [data-testid="stMetricLabel"] {
+        color: #4A5568 !important;
+    }
+    
+    /* Botones de registro */
     div.stButton > button {
         background-color: #FFFFFF;
         color: #D53F8C;
@@ -49,7 +58,35 @@ st.markdown("""
         color: white !important;
         border-color: #E11D48 !important;
         transform: translateY(-2px);
-        box-shadow: 0px 6px 8px rgba(225, 29, 72, 0.2);
+    }
+    
+    /* Cuadros de mensajes personalizados (reemplazan los de streamlit que no se leían) */
+    .mensaje-exito {
+        background-color: #DEF7EC;
+        color: #03543F;
+        padding: 15px;
+        border-radius: 10px;
+        border-left: 5px solid #31C48D;
+        font-weight: 500;
+        margin: 10px 0px;
+    }
+    .mensaje-info {
+        background-color: #E1EFFE;
+        color: #1E429F;
+        padding: 15px;
+        border-radius: 10px;
+        border-left: 5px solid #3F83F8;
+        font-weight: 500;
+        margin: 10px 0px;
+    }
+    .mensaje-error {
+        background-color: #FDE8E8;
+        color: #9B1C1C;
+        padding: 15px;
+        border-radius: 10px;
+        border-left: 5px solid #F05252;
+        font-weight: 500;
+        margin: 10px 0px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -69,7 +106,6 @@ conn.commit()
 
 # 3. FUNCIONES DE LÓGICA
 def guardar_registro(opcion, estrellas):
-    # Guardamos la fecha en un formato más amigable (Día/Mes/Año Hora)
     fecha_actual = datetime.now().strftime("%d/%m/%Y %H:%M")
     c.execute("INSERT INTO registro (fecha, opcion, estrellas) VALUES (?, ?, ?)", (fecha_actual, opcion, estrellas))
     conn.commit()
@@ -80,8 +116,17 @@ def obtener_total_estrellas():
     return res if res is not None else 0.0
 
 def obtener_historial():
-    c.execute("SELECT fecha, opcion, estrellas FROM registro ORDER BY id DESC")
+    c.execute("SELECT id, fecha, opcion, estrellas FROM registro ORDER BY id DESC")
     return c.fetchall()
+
+def eliminar_ultimo_registro():
+    c.execute("SELECT id FROM registro ORDER BY id DESC LIMIT 1")
+    ultimo = c.fetchone()
+    if ultimo:
+        c.execute("DELETE FROM registro WHERE id = ?", (ultimo[0],))
+        conn.commit()
+        return True
+    return False
 
 # 4. INTERFAZ DE USUARIO
 st.write("<h1 style='margin-bottom: 0px;'>¿Mi bibol comió bien? ❤️</h1>", unsafe_allow_html=True)
@@ -90,12 +135,11 @@ st.write("---")
 
 total_actual = obtener_total_estrellas()
 
-# Control de mensajes en la sesión
 if 'mensaje' not in st.session_state:
     st.session_state.mensaje = None
     st.session_state.tipo_mensaje = None
 
-# Distribución de los 3 botones en columnas
+# Botones de registro
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -119,27 +163,26 @@ with col3:
         st.session_state.tipo_mensaje = "error"
         st.rerun()
 
-# Espacio para mostrar los mensajes con diseños nativos bonitos
+# CORRECCIÓN: Mostrar los nuevos cuadros con colores legibles
 if st.session_state.mensaje:
     st.write("")
     if st.session_state.tipo_mensaje == "success": 
-        st.success(st.session_state.mensaje)
+        st.markdown(f'<div class="mensaje-exito">{st.session_state.mensaje}</div>', unsafe_allow_html=True)
     elif st.session_state.tipo_mensaje == "info": 
-        st.info(st.session_state.mensaje)
+        st.markdown(f'<div class="mensaje-info">{st.session_state.mensaje}</div>', unsafe_allow_html=True)
     elif st.session_state.tipo_mensaje == "error": 
-        st.warning(st.session_state.mensaje)
+        st.markdown(f'<div class="mensaje-error">{st.session_state.mensaje}</div>', unsafe_allow_html=True)
 
 st.write("---")
 
-# 5. CONTADOR Y META HACIA LA BOLSA
+# 5. CONTADOR Y META
 st.markdown("### 🎯 Tu progreso hacia la bolsa 👜")
 progreso_porcentaje = min(total_actual / 60.0, 1.0)
-
-# Barra de progreso rosa por defecto en el ecosistema
 st.progress(progreso_porcentaje)
+
+# Aquí el número saldrá oscuro automáticamente gracias al CSS de arriba
 st.metric(label="Estrellas acumuladas", value=f"{total_actual} / 60 ⭐")
 
-# Celebración si llega a la meta
 if total_actual >= 60:
     st.balloons()
     st.success("¡Felicidades mi vida! 👑 ¡Te has ganado tu bolsa! 👜❤️ ¡Te amo!")
@@ -153,7 +196,7 @@ historial = obtener_historial()
 if historial:
     tabla_datos = []
     for fila in historial:
-        fecha, opcion, est = fila
+        _, fecha, opcion, est = fila
         if est == 1.0:
             est_str = "⭐ Excelente"
         elif est == 0.5:
@@ -166,7 +209,17 @@ if historial:
             "¿Comió bien?": opcion, 
             "Premio": est_str
         })
-    # Mostramos la tabla estilizada
     st.dataframe(tabla_datos, use_container_width=True, hide_index=True)
+    
+    # NUEVA FUNCIÓN: Botón discreto para borrar el último registro en caso de error
+    st.write("")
+    expander = st.開設_expander = st.expander("¿Te equivocaste al anotar? Haz clic aquí")
+    with expander:
+        st.write("Esto borrará la última fila que añadieron en la tabla.")
+        if st.button("⚠️ Borrar el último registro", type="secondary"):
+            if eliminar_ultimo_registro():
+                st.toast("¡Último registro eliminado con éxito!")
+                st.session_state.mensaje = None # Limpia el mensaje de felicitación actual
+                st.rerun()
 else:
     st.info("Aún no hay registros. ¡Tu primera estrellita te espera hoy! ✨")
