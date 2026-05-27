@@ -1,28 +1,52 @@
 import streamlit as st
 import sqlite3
 from datetime import datetime
+import requests
+import base64
 
-# 1. CONFIGURACIÓN DE LA PÁGINA Y ESTILOS VISUALES (CSS)
+# 1. CONFIGURACIÓN DE LA PÁGINA Y ESTILOS VISUALES
 st.set_page_config(
     page_title="¿Mi bibol comió bien?", 
     page_icon="❤️", 
     layout="centered"
 )
 
-# Enlace directo a la imagen del logo en tu GitHub público
-# NOTA: Reemplaza 'tu_usuario_github' por tu nombre real de usuario de GitHub para que funcione perfecto
-USER_GITHUB = "axelramirez-art" 
-URL_LOGO = f"https://raw.githubusercontent.com/{USER_GITHUB}/contador-bibol/master/logo.jpg"
+# RECUERDA: Cambia 'tu_usuario_github' por tu nombre de usuario real de GitHub
+USER_GITHUB = "tu_usuario_github" 
+URL_LOGO = f"https://raw.githubusercontent.com/{USER_GITHUB}/contador-bibol/master/icono_app.png"
 
-# Inyectamos el código para que el iPhone reconozca el icono al añadir a pantalla de inicio
-st.markdown(f"""
-    <head>
-        <link rel="apple-touch-icon" href="{URL_LOGO}">
-        <link rel="icon" type="image/jpg" href="{URL_LOGO}">
-    </head>
-""", unsafe_allow_html=True)
+# Función mágica para incrustar la imagen directo en el navegador
+def cargar_icono_base64(url):
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            return base64.b64encode(response.content).decode()
+    except:
+        pass
+    return ""
 
-# Estilo personalizado corregido para legibilidad total
+logo_base64 = cargar_icono_base64(URL_LOGO)
+
+# Si se logró convertir la imagen, se la clavamos al iPhone directamente en las raíces de la página
+if logo_base64:
+    data_uri = f"data:image/png;base64,{logo_base64}"
+    st.markdown(f"""
+        <span style="display:none;">
+            <script>
+                // Modificar todos los lugares donde Apple busca iconos
+                var links = ['apple-touch-icon', 'apple-touch-icon-precomposed', 'icon', 'shortcut icon'];
+                links.forEach(function(rel) {{
+                    var link = document.querySelector("link[rel*='" + rel + "']") || document.createElement('link');
+                    link.type = 'image/png';
+                    link.rel = rel;
+                    link.href = '{data_uri}';
+                    document.getElementsByTagName('head')[0].appendChild(link);
+                }});
+            </script>
+        </span>
+    """, unsafe_allow_html=True)
+
+# Estilo personalizado (CSS) para colores y visibilidad
 st.markdown("""
     <style>
     /* Fondo de la aplicación */
@@ -59,7 +83,7 @@ st.markdown("""
         font-family: 'Helvetica Neue', sans-serif;
     }
     
-    /* Forzar que las métricas y contadores tengan letra oscura */
+    /* Forzar que las métricas tengan letra oscura */
     [data-testid="stMetricValue"] {
         color: #2D3748 !important;
         font-weight: bold !important;
@@ -166,8 +190,8 @@ def reiniciar_todo():
     conn.commit()
 
 # 4. INTERFAZ DE USUARIO
-# Mostramos el logo redondo arriba del todo
-st.markdown(f'<div class="logo-container"><img class="logo-img" src="{URL_LOGO}"></div>', unsafe_allow_html=True)
+if logo_base64:
+    st.markdown(f'<div class="logo-container"><img class="logo-img" src="data:image/png;base64,{logo_base64}"></div>', unsafe_allow_html=True)
 
 st.write("<h1 style='margin-bottom: 0px;'>¿Mi bibol comió bien? ❤️</h1>", unsafe_allow_html=True)
 st.write("<p style='text-align: center; color: #718096; font-size: 1.1em;'>Registra cómo te fue con tu comida hoy, mi niña</p>", unsafe_allow_html=True)
