@@ -12,7 +12,7 @@ st.set_page_config(
 )
 
 # RECUERDA: Cambia 'tu_usuario_github' por tu nombre de usuario real de GitHub
-USER_GITHUB = "tu_usuario_github" 
+USER_GITHUB = "axelramirez-art" 
 URL_LOGO = f"https://raw.githubusercontent.com/{USER_GITHUB}/contador-bibol/master/icono_app.png"
 
 # Función mágica para incrustar la imagen directo en el navegador
