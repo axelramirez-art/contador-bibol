@@ -9,6 +9,19 @@ st.set_page_config(
     layout="centered"
 )
 
+# Enlace directo a la imagen del logo en tu GitHub público
+# NOTA: Reemplaza 'tu_usuario_github' por tu nombre real de usuario de GitHub para que funcione perfecto
+USER_GITHUB = "axelramirez-art" 
+URL_LOGO = f"https://raw.githubusercontent.com/{USER_GITHUB}/contador-bibol/master/logo.jpg"
+
+# Inyectamos el código para que el iPhone reconozca el icono al añadir a pantalla de inicio
+st.markdown(f"""
+    <head>
+        <link rel="apple-touch-icon" href="{URL_LOGO}">
+        <link rel="icon" type="image/jpg" href="{URL_LOGO}">
+    </head>
+""", unsafe_allow_html=True)
+
 # Estilo personalizado corregido para legibilidad total
 st.markdown("""
     <style>
@@ -17,12 +30,27 @@ st.markdown("""
         background-color: #FFF5F5;
     }
     
+    /* Contenedor del logo redondo */
+    .logo-container {
+        text-align: center;
+        margin-top: 10px;
+    }
+    .logo-img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #D53F8C;
+        box-shadow: 0px 4px 10px rgba(213, 63, 140, 0.3);
+    }
+    
     /* Título principal */
     h1 {
         color: #D53F8C !important;
         text-align: center;
         font-family: 'Helvetica Neue', sans-serif;
         font-weight: 700;
+        margin-top: 10px !important;
     }
     
     /* Subtítulos */
@@ -40,7 +68,7 @@ st.markdown("""
         color: #4A5568 !important;
     }
     
-    /* CORRECCIÓN: Forzar que el texto dentro del expander (desplegable) sea oscuro */
+    /* Forzar que el texto dentro del expander sea oscuro */
     .stExpander div, .stExpander p, .stExpander label, .stExpander span {
         color: #2D3748 !important;
     }
@@ -138,6 +166,9 @@ def reiniciar_todo():
     conn.commit()
 
 # 4. INTERFAZ DE USUARIO
+# Mostramos el logo redondo arriba del todo
+st.markdown(f'<div class="logo-container"><img class="logo-img" src="{URL_LOGO}"></div>', unsafe_allow_html=True)
+
 st.write("<h1 style='margin-bottom: 0px;'>¿Mi bibol comió bien? ❤️</h1>", unsafe_allow_html=True)
 st.write("<p style='text-align: center; color: #718096; font-size: 1.1em;'>Registra cómo te fue con tu comida hoy, mi niña</p>", unsafe_allow_html=True)
 st.write("---")
@@ -219,19 +250,15 @@ if historial:
         })
     st.dataframe(tabla_datos, use_container_width=True, hide_index=True)
     
-    # Menú desplegable personalizado con tu frase
+    # Menú de herramientas
     st.write("")
     with st.expander("¿Presionaste mal? Presiona aquí ⚙️"):
         st.write("Usa estas opciones si hubo un error al registrar o si quieres limpiar las pruebas.")
-        
-        # Botón para borrar el último registro con la frase especial
         if st.button("⚠️ Borrar última estrellita (Btw te guardé el azul y tú me guardaste el rojo)", use_container_width=True):
             if eliminar_ultimo_registro():
                 st.toast("¡Último registro eliminado!")
                 st.session_state.mensaje = None
                 st.rerun()
-        
-        # Botón para borrar todo
         if st.button("🚨 Reiniciar toda la tabla a cero", use_container_width=True):
             reiniciar_todo()
             st.toast("¡La tabla ha vuelto a cero!")
