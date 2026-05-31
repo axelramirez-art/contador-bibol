@@ -1,6 +1,7 @@
 import streamlit as st
 import sqlite3
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import requests
 import base64
 
@@ -163,7 +164,7 @@ conn.commit()
 
 # 3. FUNCIONES DE LÓGICA
 def guardar_registro(opcion, estrellas):
-    fecha_actual = datetime.now().strftime("%d/%m/%Y %H:%M")
+    fecha_actual = datetime.now(ZoneInfo("America/Mexico_City")).strftime("%d/%m/%Y %H:%M")
     c.execute("INSERT INTO registro (fecha, opcion, estrellas) VALUES (?, ?, ?)", (fecha_actual, opcion, estrellas))
     conn.commit()
 
