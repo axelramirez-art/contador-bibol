@@ -194,7 +194,8 @@ if logo_base64:
     st.markdown(f'<div class="logo-container"><img class="logo-img" src="data:image/png;base64,{logo_base64}"></div>', unsafe_allow_html=True)
 
 st.write("<h1 style='margin-bottom: 0px;'>¿Mi bibol comió bien? ❤️</h1>", unsafe_allow_html=True)
-st.write("<p style='text-align: center; color: #718096; font-size: 1.1em;'>Registra cómo te fue con tu comida hoy, mi niña</p>", unsafe_allow_html=True)
+st.write("<p style='text-align: center; color: #718096; font-size: 1.1em; margin-bottom: 0px;'>Registra cómo te fue con tu comida hoy, mi niña</p>", unsafe_allow_html=True)
+st.write("<p style='text-align: center; color: #D53F8C; font-weight: bold; font-size: 1.2em; letter-spacing: 1.5px; margin-top: 5px; margin-bottom: 15px;'>💕 TIAMO ANDIAMO 💕</p>", unsafe_allow_html=True)
 st.write("---")
 
 total_actual = obtener_total_estrellas()
